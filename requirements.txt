@@ -1,0 +1,12 @@
+opencv-python
+mediapipe
+numpy
+pandas
+torch
+torchvision
+scikit-learn
+pyautogui
+pynput
+matplotlib
+jupyter
+filterpy

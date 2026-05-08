@@ -11,6 +11,8 @@ class HandDetector:
         self.mp_hands = mp.solutions.hands
         self.mp_draw = mp.solutions.drawing_utils
 
+        self.results = None
+
         self.hands = self.mp_hands.Hands(
             static_image_mode = self.static_mode,
             max_num_hands = self.max_hands,
@@ -21,9 +23,9 @@ class HandDetector:
     def detect_hands(self, frame, draw = True):
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        self.hands = self.hands.process(rgb_frame)
+        self.results = self.hands.process(rgb_frame)
 
-        if self.results.multi_hand_landmarks:
+        if self.results and self.results.multi_hand_landmarks:
             for hand_landmarks in self.results.multi_hand_landmarks:
                 if draw:
                     self.mp_draw.draw_landmarks(
@@ -37,8 +39,8 @@ class HandDetector:
     def get_landmark_positions(self, frame, hand_index = 0):
         landmark_list = []
 
-        if self.results.multi_hand_landmarks:
-            selected_hand = self.results.mutli_hand_landmarks[hand_index]
+        if self.results and self.results.multi_hand_landmarks:
+            selected_hand = self.results.multi_hand_landmarks[hand_index]
 
             height, width, _ = frame.shape
 

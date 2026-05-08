@@ -8,7 +8,10 @@ class CameraStream:
         self.width = width
         self.height = height
 
-        self.cap = cv2.VideoCapture(self.camera_index)
+        self.cap = cv2.VideoCapture(
+            self.camera_index,
+            cv2.CAP_AVFOUNDATION
+        )
 
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)

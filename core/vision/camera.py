@@ -1,6 +1,7 @@
 import cv2
 
 from core.vision.fps_counter import FPSCounter
+from core.vision.hand_detector import HandDetector
 
 class CameraStream:
     def __init__(self, camera_index=0, width=1280, height=720):
@@ -18,6 +19,8 @@ class CameraStream:
 
         self.fps_counter = FPSCounter()
 
+        self.hand_detector = HandDetector()
+
     def start_stream(self):
         while True:
             success, frame = self.cap.read()
@@ -27,6 +30,23 @@ class CameraStream:
                 break
 
             frame = cv2.flip(frame, 1)
+
+            frame = self.hand_detector.detect_hands(frame)
+
+            landmarks = self.hand_detector.get_landmark_positions(frame)
+
+            if landmarks:
+                index_finger_tip = landmarks[8]
+
+                _, x, y = index_finger_tip
+
+                cv2.circle(
+                    frame,
+                    (x, y),
+                    15,
+                    (255, 0, 255),
+                    cv2.FILLED
+                )
 
             fps = self.fps_counter.calculate_fps()
 
@@ -40,7 +60,7 @@ class CameraStream:
                 2
             )
 
-            cv2.imshow("IntentOS Camera Feed", frame)
+            cv2.imshow("IntentOS Hand Tracking", frame)
 
             key = cv2.waitKey(1)
 

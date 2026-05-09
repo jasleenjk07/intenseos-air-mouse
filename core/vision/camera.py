@@ -44,11 +44,20 @@ class CameraStream:
 
                 _, x, y = index_finger_tip
 
+                cv2.rectangle(
+                    frame,
+                    (100, 100),
+                    (self.width - 100, self.height - 100),
+                    (0, 255, 0),
+                    2
+                )
+
                 cv2.circle(frame, (x, y), 15, (255, 0, 255), cv2.FILLED)
 
                 cursor_x, cursor_y = self.cursor_mapper.map_position(x, y, self.width, self.height)
 
-                self.mouse_controller.move_cursor(cursor_x, cursor_y)
+                if 100 < x < self.width - 100 and 100 < y < self.height - 100:
+                    self.mouse_controller.move_cursor(cursor_x, cursor_y)
 
             fps = self.fps_counter.calculate_fps()
 

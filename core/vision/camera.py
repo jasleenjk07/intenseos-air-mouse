@@ -3,6 +3,9 @@ import cv2
 from core.vision.fps_counter import FPSCounter
 from core.vision.hand_detector import HandDetector
 
+from core.tracking.cursor_mapper import CursorMapper
+from core.actions.mouse_controller import MouseController
+
 class CameraStream:
     def __init__(self, camera_index=0, width=1280, height=720):
         self.camera_index = camera_index
@@ -18,8 +21,9 @@ class CameraStream:
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
         self.fps_counter = FPSCounter()
-
         self.hand_detector = HandDetector()
+        self.cursor_mapper = CursorMapper()
+        self.mouse_controller = MouseController()
 
     def start_stream(self):
         while True:
@@ -40,13 +44,11 @@ class CameraStream:
 
                 _, x, y = index_finger_tip
 
-                cv2.circle(
-                    frame,
-                    (x, y),
-                    15,
-                    (255, 0, 255),
-                    cv2.FILLED
-                )
+                cv2.circle(frame, (x, y), 15, (255, 0, 255), cv2.FILLED)
+
+                cursor_x, cursor_y = self.cursor_mapper.map_position(x, y, self.width, self.height)
+
+                self.mouse_controller.move_cursor(cursor_x, cursor_y)
 
             fps = self.fps_counter.calculate_fps()
 

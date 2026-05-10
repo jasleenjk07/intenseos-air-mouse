@@ -32,6 +32,8 @@ class CameraStream:
         self.gesture_detector = GestureDetector()
 
         self.dragging = False
+        self.freeze_cursor = False
+        self.frozen_position = (0, 0)
 
     def start_stream(self):
 
@@ -58,22 +60,50 @@ class CameraStream:
 
                 cursor_x, cursor_y = self.cursor_mapper.map_position(x, y, self.width, self.height)
 
-                self.mouse_controller.move_cursor(cursor_x, cursor_y)
+                if not self.freeze_cursor:
+                    self.mouse_controller.move_cursor(cursor_x, cursor_y)
 
                 gesture_data = self.gesture_detector.detect_click(landmarks)
 
                 cv2.putText(frame, f"Pinch: {int(gesture_data['distance'])}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
-                if gesture_data["should_click"]:
+                if gesture_data["should_click"] and not gesture_data["is_holding"]:
+
+                    self.freeze_cursor = True
+
+                    self.frozen_position = (cursor_x, cursor_y)
+
+                    self.mouse_controller.move_cursor(
+                        self.frozen_position[0],
+                        self.frozen_position[1]
+                    )
+
                     self.mouse_controller.left_click()
 
-                if (gesture_data["is_holding"] and not self.dragging):
-                    self.mouse_controller.mouse_down()  
+                if (
+                    gesture_data["is_holding"]
+                    and not self.dragging
+                ):
+
+                    self.freeze_cursor = False
+
+                    self.mouse_controller.mouse_down()
+
                     self.dragging = True
 
-                if (not gesture_data["is_holding"] and self.dragging):
+                if (
+                    not gesture_data["is_holding"]
+                    and self.dragging
+                ):
+
                     self.mouse_controller.mouse_up()
+
                     self.dragging = False
+
+                    self.freeze_cursor = False
+
+                if not gesture_data["is_pinching"]:
+                    self.freeze_cursor = False
 
             fps = self.fps_counter.calculate_fps()
 

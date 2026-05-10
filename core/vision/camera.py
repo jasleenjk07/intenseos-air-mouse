@@ -31,7 +31,7 @@ class CameraStream:
 
         self.gesture_detector = GestureDetector()
 
-        self.clicking = False
+        self.dragging = False
 
     def start_stream(self):
 
@@ -60,16 +60,20 @@ class CameraStream:
 
                 self.mouse_controller.move_cursor(cursor_x, cursor_y)
 
-                is_click, distance = self.gesture_detector.detect_click(landmarks)
-                
-                cv2.putText(frame, f"Pinch: {int(distance)}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                gesture_data = self.gesture_detector.detect_click(landmarks)
 
-                if is_click and not self.clicking:
+                cv2.putText(frame, f"Pinch: {int(gesture_data['distance'])}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+
+                if gesture_data["should_click"]:
                     self.mouse_controller.left_click()
-                    self.clicking = True
 
-                if not is_click:
-                    self.clicking = False
+                if (gesture_data["is_holding"] and not self.dragging):
+                    self.mouse_controller.mouse_down()  
+                    self.dragging = True
+
+                if (not gesture_data["is_holding"] and self.dragging):
+                    self.mouse_controller.mouse_up()
+                    self.dragging = False
 
             fps = self.fps_counter.calculate_fps()
 

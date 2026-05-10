@@ -58,8 +58,7 @@ class CameraStream:
 
                 cursor_x, cursor_y = self.cursor_mapper.map_position(x, y, self.width, self.height)
 
-                if 100 < x < self.width - 100 and 100 < y < self.height - 100:
-                    self.mouse_controller.move_cursor(cursor_x, cursor_y)
+                self.mouse_controller.move_cursor(cursor_x, cursor_y)
 
                 is_click, distance = self.gesture_detector.detect_click(landmarks)
                 

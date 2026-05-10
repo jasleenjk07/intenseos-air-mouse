@@ -9,3 +9,9 @@ class MouseController:
 
     def left_click(self):
         pyautogui.click()
+
+    def mouse_down(self):
+        pyautogui.mouseDown()
+
+    def mouse_up(self):
+        pyautogui.mouseUp()

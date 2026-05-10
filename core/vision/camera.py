@@ -6,6 +6,8 @@ from core.vision.hand_detector import HandDetector
 from core.tracking.cursor_mapper import CursorMapper
 from core.actions.mouse_controller import MouseController
 
+from core.gestures.gesture_detector import GestureDetector
+
 
 class CameraStream:
     def __init__(self, camera_index=0, width=1280, height=720):
@@ -23,8 +25,13 @@ class CameraStream:
 
         self.fps_counter = FPSCounter()
         self.hand_detector = HandDetector()
+
         self.cursor_mapper = CursorMapper()
         self.mouse_controller = MouseController()
+
+        self.gesture_detector = GestureDetector()
+
+        self.clicking = False
 
     def start_stream(self):
 
@@ -53,6 +60,17 @@ class CameraStream:
 
                 if 100 < x < self.width - 100 and 100 < y < self.height - 100:
                     self.mouse_controller.move_cursor(cursor_x, cursor_y)
+
+                is_click, distance = self.gesture_detector.detect_click(landmarks)
+                
+                cv2.putText(frame, f"Pinch: {int(distance)}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+
+                if is_click and not self.clicking:
+                    self.mouse_controller.left_click()
+                    self.clicking = True
+
+                if not is_click:
+                    self.clicking = False
 
             fps = self.fps_counter.calculate_fps()
 
